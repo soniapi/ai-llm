@@ -34,6 +34,7 @@ dependencies = [
 [[package]]
 name = "ai_infra"
 version = "0.1.0"
+source = "git+https://github.com/soniapi/ai-infra#3220b6d0d3d271770651cf30e1a1d85ba2353131"
 dependencies = [
  "calamine",
  "chrono",

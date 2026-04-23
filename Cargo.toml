@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ai_infra = { version = "0.1.0", path = "repos/ai-infra" }
+ai_infra = { version = "0.1.0", git = "https://github.com/soniapi/ai-infra" }
 anyhow = "1.0.102"
 bincode = "1.3.3"
 candle-core = "0.10.2"
