@@ -1,3 +1,6 @@
+// `ai_hypo` is the name of this library crate as defined in Cargo.toml.
+// Integration tests in the `tests/` directory are treated as external crates,
+// so they must import the library using its name rather than `crate::`.
 use ai_hypo::ai_infra::context_service_server::{ContextService, ContextServiceServer};
 use ai_hypo::ai_infra::{ColumnDefinition, ColumnStatistics, HypothesisContextRequest, HypothesisContextResponse};
 use ai_hypo::server::{create_app, AppState};
