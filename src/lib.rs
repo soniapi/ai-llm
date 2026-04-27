@@ -95,8 +95,7 @@ pub async fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let tls_config = ClientTlsConfig::new().with_native_roots();
     let channel = tonic::transport::Channel::from_static("https://server-807069273288.us-central1.run.app")
         .tls_config(tls_config)?
-        .connect()
-        .await?;
+        .connect_lazy();
 
     let app_state = server::AppState {
         llm,
