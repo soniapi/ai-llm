@@ -1,0 +1,3 @@
+[submodule "ai-infra"]
+	path = ai-infra
+	url = https://github.com/soniapi/ai-infra
