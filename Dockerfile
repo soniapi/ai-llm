@@ -16,11 +16,11 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=builder /app/target/release/ai_hypo /app/ai_hypo
+COPY --from=builder /app/target/release/ai_llm /app/ai_llm
 
 # Cloud Run sets the PORT env variable; we default to 8080 if not set
 ENV PORT=8080
 
 EXPOSE 8080
 
-CMD ["/app/ai_hypo"]
+CMD ["/app/ai_llm"]
