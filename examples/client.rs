@@ -3,7 +3,7 @@ use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Get the base URL from the command line or environment, defaulting to the Cloud Run URL
+    // Get the base URL from the command line or environment, defaulting to the Google Cloud Run service
     let base_url = env::args()
         .nth(1)
         .unwrap_or_else(|| "https://ai-llm-5u7ahgmduq-uc.a.run.app".to_string());
