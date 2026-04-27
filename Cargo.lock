@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ai_hypo"
+name = "ai_llm"
 version = "0.1.0"
 dependencies = [
  "axum 0.8.9",
