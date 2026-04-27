@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.88-slim-bookworm as builder
+FROM rust:1.88-slim-bookworm AS builder
 
 # Install required system dependencies for tonic-build (protobuf-compiler) and postgres (libpq-dev)
 RUN apt-get update && apt-get install -y protobuf-compiler libpq-dev && rm -rf /var/lib/apt/lists/*
