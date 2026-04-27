@@ -19,6 +19,7 @@ dependencies = [
  "http-body-util",
  "prost",
  "reqwest",
+ "rustls",
  "serde",
  "tokio",
  "tonic",
