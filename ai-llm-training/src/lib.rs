@@ -59,7 +59,7 @@ pub fn run_training_loop() {
 
         // 7. Backpropagation and Optimizer Step
         llm.zero_grad();
-        llm.backward(&loss_grad);
+        llm.backward(&logits, &loss_grad);
         llm.step(learning_rate);
     }
 

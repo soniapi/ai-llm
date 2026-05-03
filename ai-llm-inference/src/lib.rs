@@ -50,22 +50,17 @@ impl LLM {
         self.lm_head.step(lr);
     }
 
-    pub fn backward(&mut self, _loss_grad: &Tensor) {
-        // This is a stub for the autograd backward pass.
-        // A real implementation requires constructing a computation graph during the forward pass,
-        // and using it to propagate the gradients from _loss_grad back through lm_head,
-        // blocks, and token_embedding, updating their weight_grad and bias_grad.
-        // For demonstration, we simply call zero_grad here to simulate interaction with gradients.
-        // The structural interfaces to store gradients and apply optimizer steps are complete.
+    pub fn backward(&mut self, logits: &Tensor, loss_grad: &Tensor) {
+        logits.backward(Some(loss_grad));
     }
 
     pub fn forward(&self, tokens: &[usize], vocab_size: usize) -> Tensor {
         let seq_len = tokens.len();
 
         // One-hot encode tokens and pass to embedding
-        let mut one_hot = Tensor::zeros(vec![seq_len, vocab_size]);
+        let one_hot = Tensor::zeros(vec![seq_len, vocab_size]);
         for (i, &token) in tokens.iter().enumerate() {
-            one_hot.data[i * vocab_size + token] = 1.0;
+            one_hot.inner.write().unwrap().data[i * vocab_size + token] = 1.0;
         }
 
         let mut x = self.token_embedding.forward(&one_hot);
@@ -85,9 +80,10 @@ impl LLM {
             let logits = self.forward(&tokens, vocab_size);
 
             // Get last token's logits
-            let last_dim = *logits.shape.last().unwrap();
-            let start_idx = (logits.shape[0] - 1) * last_dim;
-            let last_logits = &logits.data[start_idx..start_idx + last_dim];
+            let last_dim = *logits.shape().last().unwrap();
+            let start_idx = (logits.shape()[0] - 1) * last_dim;
+            let logits_data = logits.data();
+            let last_logits = &logits_data[start_idx..start_idx + last_dim];
 
             // Greedy decoding (argmax)
             let mut max_val = std::f32::NEG_INFINITY;
