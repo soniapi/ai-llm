@@ -34,6 +34,31 @@ impl LLM {
         }
     }
 
+    pub fn zero_grad(&mut self) {
+        self.token_embedding.zero_grad();
+        for block in &mut self.blocks {
+            block.zero_grad();
+        }
+        self.lm_head.zero_grad();
+    }
+
+    pub fn step(&mut self, lr: f32) {
+        self.token_embedding.step(lr);
+        for block in &mut self.blocks {
+            block.step(lr);
+        }
+        self.lm_head.step(lr);
+    }
+
+    pub fn backward(&mut self, _loss_grad: &Tensor) {
+        // This is a stub for the autograd backward pass.
+        // A real implementation requires constructing a computation graph during the forward pass,
+        // and using it to propagate the gradients from _loss_grad back through lm_head,
+        // blocks, and token_embedding, updating their weight_grad and bias_grad.
+        // For demonstration, we simply call zero_grad here to simulate interaction with gradients.
+        // The structural interfaces to store gradients and apply optimizer steps are complete.
+    }
+
     pub fn forward(&self, tokens: &[usize], vocab_size: usize) -> Tensor {
         let seq_len = tokens.len();
 

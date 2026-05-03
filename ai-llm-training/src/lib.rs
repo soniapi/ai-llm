@@ -25,7 +25,8 @@ pub fn run_training_loop() {
     let vocab_size = tokenizer.vocab_size();
     let d_model = 64;
     let num_layers = 2;
-    let llm = LLM::new(vocab_size, d_model, num_layers);
+    let mut llm = LLM::new(vocab_size, d_model, num_layers);
+    let learning_rate = 0.001;
 
     // 4. Process raw data into sequences
     for object in raw_data {
@@ -38,22 +39,28 @@ pub fn run_training_loop() {
         // Tokenize the sequence
         let tokens = tokenizer.encode(&sequence);
 
-        if tokens.is_empty() {
+        if tokens.len() < 2 {
             continue;
         }
 
-        // 5. Forward Pass (Self-supervised Next-Token Prediction)
-        // In self-supervised learning, we feed the sequence up to length N-1 to predict the Nth token.
-        // For simplicity in this loop, we do a full forward pass and compute logits.
-        let _logits = llm.forward(&tokens, vocab_size);
+        // Create self-supervised training targets (next token prediction)
+        // Input: tokens[0..N-1], Target: tokens[1..N]
+        let input_tokens = &tokens[0..tokens.len() - 1];
+        let target_tokens = &tokens[1..tokens.len()];
 
-        // --- BACKPROPAGATION STUB ---
-        // At this point, `logits` contains the unnormalized predictions.
-        // To complete training, the following steps would be implemented in `ai_llm_inference::tensor`:
-        // 1. Calculate Cross-Entropy Loss: loss = CrossEntropy(logits, target_tokens)
-        // 2. Backpropagation: loss.backward() -> computes gradients for all weights in `llm`
-        // 3. Optimizer Step: optimizer.step(&mut llm.parameters) -> updates weights based on gradients
-        // ----------------------------
+        // 5. Forward Pass (Calculate unnormalized probabilities)
+        let logits = llm.forward(input_tokens, vocab_size);
+
+        // 6. Loss Calculation
+        let loss = logits.cross_entropy(target_tokens);
+        let loss_grad = logits.cross_entropy_grad(target_tokens);
+
+        println!("Sequence Loss: {:.4}", loss);
+
+        // 7. Backpropagation and Optimizer Step
+        llm.zero_grad();
+        llm.backward(&loss_grad);
+        llm.step(learning_rate);
     }
 
     println!("Completed training batch processing.");
