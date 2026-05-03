@@ -57,6 +57,7 @@ impl LLM {
         // blocks, and token_embedding, updating their weight_grad and bias_grad.
         // For demonstration, we simply call zero_grad here to simulate interaction with gradients.
         // The structural interfaces to store gradients and apply optimizer steps are complete.
+        self.zero_grad();
     }
 
     pub fn forward(&self, tokens: &[usize], vocab_size: usize) -> Tensor {
