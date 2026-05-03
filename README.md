@@ -1,19 +1,18 @@
-# AI-LLM
+# ai-llm
 
 **Dynamic Hypothesis Generator**
 
-This repository contains the `ai_llm` project, a pure Rust implementation of an LLM built from scratch. It is designed specifically for dynamic hypothesis generation based on database schemas and statistics.
-
-Unlike typical LLM implementations, this project relies on a custom, "from scratch" Transformer architecture and does not use external machine learning libraries (like PyTorch or TensorFlow) or external LLM APIs (like OpenAI).
+This repository contains the `ai_llm` project, a Rust implementation of an LLM. It is designed specifically for dynamic hypothesis generation based on database schemas and statistics.
 
 ## Architecture
 
-The `ai_llm` project is an HTTP web service deployed on Google Cloud Run.
+The `ai_llm` project is a standalone modulith and a microservice deployed on Google Cloud Run.
 
-1.  **Frontend (HTTP API):** Uses `axum` to serve an HTTP API. The core public endpoint is a `GET /generate`.
-2.  **Backend Integration (gRPC):** Communicates with the `ai-infra` backend via gRPC (using `tonic` and `prost`) to fetch database schema context dynamically.
-3.  **Model:** A custom-built Transformer model (defined in `ai-llm-inference/src/lib.rs` and `ai-llm-inference/src/transformer.rs`) that takes the schema context as a prompt and generates a hypothesis.
-4.  **Training:** The `ai-llm-training` module (`ai-llm-training/src/lib.rs`) contains the self-supervised training data pipeline loop.
+1. **Training:** The `ai-llm-training` module (`ai-llm-training/src/lib.rs`) contains the self-supervised training data pipeline loop. It calls ai_infra::establish_connection(), and runs direct SQL queries to return raw PostgreSQL data that stream directly into Rust Vec memory structures.
+2. **Model:** A custom-built Transformer model (defined in `ai-llm-inference/src/lib.rs` and `ai-llm-inference/src/transformer.rs`) that takes the schema context as a prompt and generates a hypothesis.
+3. **Backend Integration (gRPC):** Communicates with the `ai-infra` backend via gRPC (using `tonic` and `prost`) to fetch database schema context dynamically.
+4. **Frontend (HTTP API):** Uses `axum` to serve an HTTP API. The core public endpoint is a `GET /generate`.
+
 
 ## Prerequisites
 
