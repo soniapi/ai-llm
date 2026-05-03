@@ -1,7 +1,7 @@
-use ai_llm::ai_infra::context_service_server::{ContextService, ContextServiceServer};
-use ai_llm::ai_infra::{ColumnDefinition, ColumnStatistics, HypothesisContextRequest, HypothesisContextResponse};
-use ai_llm::server::{create_app, AppState};
-use ai_llm::{LLM, tokenizer::Tokenizer};
+use ai_llm_inference::ai_infra::context_service_server::{ContextService, ContextServiceServer};
+use ai_llm_inference::ai_infra::{ColumnDefinition, ColumnStatistics, HypothesisContextRequest, HypothesisContextResponse};
+use ai_llm_inference::server::{create_app, AppState};
+use ai_llm_inference::{LLM, tokenizer::Tokenizer};
 use axum::{
     body::Body,
     http::{Request, StatusCode},
