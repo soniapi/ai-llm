@@ -1,5 +1,11 @@
 use reqwest;
+use serde::Deserialize;
 use std::env;
+
+#[derive(Deserialize)]
+struct HypothesisResponse {
+    pub hypothesis: String,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -16,10 +22,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = reqwest::get(&url).await?;
 
     if response.status().is_success() {
-        let hypothesis = response.text().await?;
+        let response_data: HypothesisResponse = response.json().await?;
         println!("\nGenerated Hypothesis:");
         println!("---------------------");
-        println!("{}", hypothesis);
+        println!("{}", response_data.hypothesis);
         println!("---------------------");
     } else {
         eprintln!("Error: Received status code {}", response.status());

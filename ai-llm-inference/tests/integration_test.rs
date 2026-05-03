@@ -108,5 +108,5 @@ async fn test_generate_hypothesis_integration() {
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let body_str = String::from_utf8(body.to_vec()).unwrap();
 
-    assert!(!body_str.is_empty());
+    assert!(body_str.contains("\"hypothesis\":"));
 }
