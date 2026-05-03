@@ -12,7 +12,8 @@ The `ai_llm` project is an HTTP web service deployed on Google Cloud Run.
 
 1.  **Frontend (HTTP API):** Uses `axum` to serve an HTTP API. The core public endpoint is a `GET /generate`.
 2.  **Backend Integration (gRPC):** Communicates with the `ai-infra` backend via gRPC (using `tonic` and `prost`) to fetch database schema context dynamically.
-3.  **Model:** A custom-built Transformer model (defined in `src/lib.rs` and `src/transformer.rs`) that takes the schema context as a prompt and generates a hypothesis.
+3.  **Model:** A custom-built Transformer model (defined in `ai-llm-inference/src/lib.rs` and `ai-llm-inference/src/transformer.rs`) that takes the schema context as a prompt and generates a hypothesis.
+4.  **Training:** The `ai-llm-training` module (`ai-llm-training/src/lib.rs`) contains the self-supervised training data pipeline loop.
 
 ## Prerequisites
 
@@ -33,7 +34,7 @@ You can build and run the service locally using standard Cargo commands:
 
 ```bash
 cargo build
-cargo run
+cargo run -p ai-llm-inference
 ```
 
 By default, the server listens on `http://localhost:8080` (or the port defined by the `PORT` environment variable).
@@ -48,18 +49,18 @@ cargo test
 
 ## Usage Example
 
-A Rust client example is provided in the `examples/` directory to demonstrate how to call the public `/generate` endpoint.
+A Rust client example is provided in the `ai-llm-inference/examples/` directory to demonstrate how to call the public `/generate` endpoint.
 
 To run the example against the live Google Cloud Run environment (`https://ai-llm-5u7ahgmduq-uc.a.run.app`):
 
 ```bash
-cargo run --example client
+cargo run -p ai-llm-inference --example client
 ```
 
 To run the example against a local server:
 
 ```bash
-cargo run --example client http://localhost:8080
+cargo run -p ai-llm-inference --example client http://localhost:8080
 ```
 
 ## Deployment
