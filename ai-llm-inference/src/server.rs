@@ -1,4 +1,5 @@
-use axum::{routing::get, Router, extract::State};
+use axum::{routing::get, Router, extract::State, Json};
+use serde::Serialize;
 use std::env;
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -78,7 +79,12 @@ pub async fn get_identity_token() -> Result<String, String> {
     Err("Could not obtain GCP identity token".into())
 }
 
-async fn generate_hypothesis(State(state): State<Arc<AppState>>) -> Result<String, String> {
+#[derive(Serialize)]
+pub struct HypothesisResponse {
+    pub hypothesis: String,
+}
+
+async fn generate_hypothesis(State(state): State<Arc<AppState>>) -> Result<Json<HypothesisResponse>, String> {
     let token = (state.token_provider)().await?;
     let bearer_token = format!("Bearer {}", token);
 
@@ -110,5 +116,5 @@ async fn generate_hypothesis(State(state): State<Arc<AppState>>) -> Result<Strin
 
     let generated_hypothesis = state.llm.generate(&problem_statement, &state.tokenizer, 20);
 
-    Ok(generated_hypothesis)
+    Ok(Json(HypothesisResponse { hypothesis: generated_hypothesis }))
 }
