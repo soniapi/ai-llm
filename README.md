@@ -10,7 +10,7 @@ The `ai_llm` project is a standalone modulith and a microservice deployed on Goo
 
 1. **Training:** The `ai-llm-training` module (`ai-llm-training/src/lib.rs`) contains the self-supervised training data pipeline loop. It calls ai_infra::establish_connection(), and runs direct SQL queries to return raw PostgreSQL data that stream directly into Rust Vec memory structures.
 2. **Model:** A custom-built Transformer model (defined in `ai-llm-inference/src/lib.rs` and `ai-llm-inference/src/transformer.rs`) that takes the schema context as a prompt and generates a hypothesis.
-3. **Backend Integration (gRPC):** Communicates with the `ai-infra` backend via gRPC (using `tonic` and `prost`) to fetch database schema context dynamically.
+3. **Backend Integration (gRPC):** Communicates with the `ai-infra` backend via gRPC (using `tonic` and `prost`) to fetch database schema context dynamically. Note: gRPC is exclusively used for fetching schema metadata and statistics for inference prompts, and is *not* used for streaming the large volume of training table data (which is handled via direct SQL queries in the training module).
 4. **Frontend (REST API):** Uses `axum` to serve a REST API. The core public endpoint is a `GET /generate`.
 
 
