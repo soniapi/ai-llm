@@ -3,6 +3,8 @@ use crate::tensor::Tensor;
 pub struct Linear {
     pub weight: Tensor,
     pub bias: Tensor,
+    pub weight_grad: Tensor,
+    pub bias_grad: Tensor,
 }
 
 impl Linear {
@@ -10,17 +12,35 @@ impl Linear {
         // Random initialization would go here, we just use 0.01 for dummy initialization
         let weight = Tensor::new(vec![0.01; in_features * out_features], vec![in_features, out_features]);
         let bias = Tensor::zeros(vec![out_features]);
-        Self { weight, bias }
+        let weight_grad = Tensor::zeros(vec![in_features, out_features]);
+        let bias_grad = Tensor::zeros(vec![out_features]);
+        Self { weight, bias, weight_grad, bias_grad }
     }
 
     pub fn forward(&self, x: &Tensor) -> Tensor {
         x.matmul(&self.weight).broadcast_add(&self.bias)
+    }
+
+    pub fn zero_grad(&mut self) {
+        for val in self.weight_grad.data.iter_mut() { *val = 0.0; }
+        for val in self.bias_grad.data.iter_mut() { *val = 0.0; }
+    }
+
+    pub fn step(&mut self, lr: f32) {
+        for (w, g) in self.weight.data.iter_mut().zip(self.weight_grad.data.iter()) {
+            *w -= lr * g;
+        }
+        for (b, g) in self.bias.data.iter_mut().zip(self.bias_grad.data.iter()) {
+            *b -= lr * g;
+        }
     }
 }
 
 pub struct LayerNorm {
     pub weight: Tensor,
     pub bias: Tensor,
+    pub weight_grad: Tensor,
+    pub bias_grad: Tensor,
     pub eps: f32,
 }
 
@@ -29,7 +49,23 @@ impl LayerNorm {
         Self {
             weight: Tensor::new(vec![1.0; features], vec![features]),
             bias: Tensor::zeros(vec![features]),
+            weight_grad: Tensor::zeros(vec![features]),
+            bias_grad: Tensor::zeros(vec![features]),
             eps: 1e-5,
+        }
+    }
+
+    pub fn zero_grad(&mut self) {
+        for val in self.weight_grad.data.iter_mut() { *val = 0.0; }
+        for val in self.bias_grad.data.iter_mut() { *val = 0.0; }
+    }
+
+    pub fn step(&mut self, lr: f32) {
+        for (w, g) in self.weight.data.iter_mut().zip(self.weight_grad.data.iter()) {
+            *w -= lr * g;
+        }
+        for (b, g) in self.bias.data.iter_mut().zip(self.bias_grad.data.iter()) {
+            *b -= lr * g;
         }
     }
 
@@ -86,6 +122,20 @@ impl SelfAttention {
         }
     }
 
+    pub fn zero_grad(&mut self) {
+        self.q_proj.zero_grad();
+        self.k_proj.zero_grad();
+        self.v_proj.zero_grad();
+        self.out_proj.zero_grad();
+    }
+
+    pub fn step(&mut self, lr: f32) {
+        self.q_proj.step(lr);
+        self.k_proj.step(lr);
+        self.v_proj.step(lr);
+        self.out_proj.step(lr);
+    }
+
     pub fn forward(&self, x: &Tensor) -> Tensor {
         // Simplified Single-head Attention for dummy LLM
         let q = self.q_proj.forward(x);
@@ -126,6 +176,16 @@ impl FeedForward {
         }
     }
 
+    pub fn zero_grad(&mut self) {
+        self.linear1.zero_grad();
+        self.linear2.zero_grad();
+    }
+
+    pub fn step(&mut self, lr: f32) {
+        self.linear1.step(lr);
+        self.linear2.step(lr);
+    }
+
     pub fn forward(&self, x: &Tensor) -> Tensor {
         let mut h = self.linear1.forward(x);
         // ReLU activation
@@ -151,6 +211,20 @@ impl TransformerBlock {
             ff: FeedForward::new(d_model, d_model * 4),
             norm2: LayerNorm::new(d_model),
         }
+    }
+
+    pub fn zero_grad(&mut self) {
+        self.attention.zero_grad();
+        self.norm1.zero_grad();
+        self.ff.zero_grad();
+        self.norm2.zero_grad();
+    }
+
+    pub fn step(&mut self, lr: f32) {
+        self.attention.step(lr);
+        self.norm1.step(lr);
+        self.ff.step(lr);
+        self.norm2.step(lr);
     }
 
     pub fn forward(&self, x: &Tensor) -> Tensor {

@@ -97,4 +97,41 @@ impl Tensor {
 
         Tensor::new(result_data, self.shape.clone())
     }
+
+    /// Computes the Cross Entropy loss between logits (2D tensor [seq_len, vocab_size])
+    /// and target indices (1D array of length seq_len).
+    pub fn cross_entropy(&self, targets: &[usize]) -> f32 {
+        let probs = self.softmax();
+        let seq_len = self.shape[0];
+        let vocab_size = self.shape[1];
+
+        let mut loss = 0.0;
+        for i in 0..seq_len {
+            let target_idx = targets[i];
+            let prob = probs.data[i * vocab_size + target_idx];
+            loss -= prob.ln(); // -log(p)
+        }
+
+        loss / (seq_len as f32)
+    }
+
+    /// Computes the gradient of Cross Entropy loss w.r.t the logits.
+    /// Returns a tensor of the same shape as self.
+    pub fn cross_entropy_grad(&self, targets: &[usize]) -> Tensor {
+        let mut grad = self.softmax(); // dL/dz = p_i - y_i
+        let seq_len = self.shape[0];
+        let vocab_size = self.shape[1];
+
+        for i in 0..seq_len {
+            let target_idx = targets[i];
+            grad.data[i * vocab_size + target_idx] -= 1.0;
+        }
+
+        // Average over batch/sequence length
+        for val in grad.data.iter_mut() {
+            *val /= seq_len as f32;
+        }
+
+        grad
+    }
 }
