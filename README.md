@@ -46,6 +46,28 @@ To invoke the training job (which connects to the database via `ai-infra` and ru
 cargo run -p ai-llm-training
 ```
 
+You can also run the provided example specifically for executing the training loop:
+
+```bash
+cargo run -p ai-llm-training --example train
+```
+
+Here is a simple example demonstrating how the `run_training_loop` is invoked in your code:
+
+```rust
+use ai_llm_training::run_training_loop;
+
+fn main() {
+    println!("Example: Initializing the AI-LLM Modulith Training Job...");
+
+    // This runs the self-supervised training process by connecting to the database
+    // and processing raw data into sequences.
+    run_training_loop();
+
+    println!("Example: Training Job finished successfully.");
+}
+```
+
 ## Testing
 
 Integration tests verify the REST API routing and stub the external `ai-infra` gRPC interactions:
