@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 ai_infra = { path = "../ai-infra" }
+ai-llm-inference = { path = "../ai-llm-inference" }
+diesel = { version = "2.3.9", features = ["postgres"] }
