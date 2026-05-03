@@ -37,7 +37,9 @@ dependencies = [
 name = "ai-llm-training"
 version = "0.1.0"
 dependencies = [
+ "ai-llm-inference",
  "ai_infra",
+ "diesel",
 ]
 
 [[package]]
