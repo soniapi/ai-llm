@@ -38,6 +38,14 @@ cargo run -p ai-llm-inference
 
 By default, the server listens on `http://localhost:8080` (or the port defined by the `PORT` environment variable).
 
+### Running Training
+
+To invoke the training job (which connects to the database via `ai-infra` and runs the self-supervised training loop), run:
+
+```bash
+cargo run -p ai-llm-training
+```
+
 ## Testing
 
 Integration tests verify the REST API routing and stub the external `ai-infra` gRPC interactions:
