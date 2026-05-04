@@ -44,15 +44,23 @@ pub async fn start_server(app_state: AppState) -> Result<(), Box<dyn std::error:
 }
 
 pub async fn get_identity_token() -> Result<String, String> {
+    use google_cloud_auth::{create_token_source, Config, TokenSource};
+
     let audience = "https://server-807069273288.us-central1.run.app";
 
-    let provider = gcp_auth::provider().await
-        .map_err(|e| format!("Failed to initialize GCP auth provider: {}", e))?;
+    let config = Config {
+        audience: Some(audience.to_string()),
+        scopes: None,
+        sub: None,
+    };
 
-    let token = provider.id_token(audience).await
+    let ts = create_token_source(config).await
+        .map_err(|e| format!("Failed to create GCP token source: {}", e))?;
+
+    let token = ts.token().await
         .map_err(|e| format!("Failed to obtain GCP identity token: {}", e))?;
 
-    Ok(token.as_str().to_string())
+    Ok(token.access_token)
 }
 
 #[derive(Serialize)]
