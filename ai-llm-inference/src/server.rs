@@ -12,6 +12,7 @@ use crate::LLM;
 use tonic::Request;
 use std::str::FromStr;
 
+use std::fmt::Write;
 use std::future::Future;
 use std::pin::Pin;
 
@@ -108,10 +109,10 @@ async fn generate_hypothesis(State(state): State<Arc<AppState>>) -> Result<Json<
 
     let mut problem_statement = String::from("Based on the database schema payload:\n");
     for col in response.schema {
-        problem_statement.push_str(&format!("Column: {}, Type: {}, Partition Key: {}\n", col.column_name, col.data_type, col.is_partition_key));
+        let _ = write!(problem_statement, "Column: {}, Type: {}, Partition Key: {}\n", col.column_name, col.data_type, col.is_partition_key);
     }
     for stat in response.stats {
-        problem_statement.push_str(&format!("Stat: {}, Min: {}, Max: {}, Avg: {}, Rows: {}\n", stat.column_name, stat.min_value, stat.max_value, stat.average_value, stat.total_rows));
+        let _ = write!(problem_statement, "Stat: {}, Min: {}, Max: {}, Avg: {}, Rows: {}\n", stat.column_name, stat.min_value, stat.max_value, stat.average_value, stat.total_rows);
     }
 
     let generated_hypothesis = state.llm.generate(&problem_statement, &state.tokenizer, 20);
