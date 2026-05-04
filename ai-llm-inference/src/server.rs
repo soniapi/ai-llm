@@ -44,39 +44,15 @@ pub async fn start_server(app_state: AppState) -> Result<(), Box<dyn std::error:
 }
 
 pub async fn get_identity_token() -> Result<String, String> {
-    if env::var("K_SERVICE").is_ok() {
-        let audience = "https://server-807069273288.us-central1.run.app";
-        let client = reqwest::Client::new();
-        let resp = client.get(format!("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience={}", audience))
-            .header("Metadata-Flavor", "Google")
-            .send()
-            .await
-            .map_err(|e| format!("Failed to request metadata: {}", e))?;
+    let audience = "https://server-807069273288.us-central1.run.app";
 
-        if resp.status().is_success() {
-            let token = resp.text().await.map_err(|e| format!("Failed to read metadata response: {}", e))?;
-            return Ok(token);
-        } else {
-            return Err(format!("Metadata request failed: {}", resp.status()));
-        }
-    } else {
-        let output = tokio::process::Command::new("gcloud")
-            .args(&["auth", "print-identity-token"])
-            .output()
-            .await;
+    let provider = gcp_auth::provider().await
+        .map_err(|e| format!("Failed to initialize GCP auth provider: {}", e))?;
 
-        match output {
-            Ok(out) if out.status.success() => {
-                let token = String::from_utf8(out.stdout).unwrap_or_default().trim().to_string();
-                if !token.is_empty() {
-                    return Ok(token);
-                }
-            }
-            _ => {}
-        }
-    }
+    let token = provider.id_token(audience).await
+        .map_err(|e| format!("Failed to obtain GCP identity token: {}", e))?;
 
-    Err("Could not obtain GCP identity token".into())
+    Ok(token.as_str().to_string())
 }
 
 #[derive(Serialize)]
