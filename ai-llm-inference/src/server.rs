@@ -45,12 +45,12 @@ pub async fn start_server(app_state: AppState) -> Result<(), Box<dyn std::error:
 }
 
 pub async fn get_identity_token() -> Result<String, String> {
-    use google_cloud_auth::{create_token_source, Config, TokenSource};
+    use google_cloud_auth::project::{create_token_source, Config};
 
     let audience = "https://server-807069273288.us-central1.run.app";
 
     let config = Config {
-        audience: Some(audience.to_string()),
+        audience: Some(audience),
         scopes: None,
         sub: None,
     };
